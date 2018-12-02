@@ -475,7 +475,7 @@ class GameScene(Scene):
                 seed = random.random()
                 gen = OpenSimplex(seed=round(seed * 100000))
 
-                if self.TOP_H > gen.noise2d(px / self.WIDTH, py / self.HEIGHT) > self.STONE_H:
+                if self.TREE_H > gen.noise2d(px / self.WIDTH, py / self.HEIGHT) > self.SEA:
                     # Spawn near a beach
                     break
         else:
