@@ -5,10 +5,25 @@ class Scene:
     ASSETS = '../../assets'
 
     def __init__(self, game, start_active=False):
-        self.active = start_active
+        self._active = start_active
+        if start_active:
+            self._scene_went_active()
 
         self.screen = game.screen
         self._game = game
+
+    @property
+    def active(self):
+        return self._active
+
+    @active.setter
+    def active(self, val):
+        if not self._active and val:
+            self._scene_went_active()
+        self._active = val
+
+    def _scene_went_active(self):
+        pass
 
     def render(self):
         pass

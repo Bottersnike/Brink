@@ -1,3 +1,5 @@
+import pygame
+
 from game.pyg import BMPFont
 from .scene import Scene
 
@@ -12,6 +14,8 @@ class SlidesScene(Scene):
         super().__init__(*args, **kwargs)
 
         self.font = BMPFont(self.path('tiles/font.png'), 16, 16, 3)
+        self.font2 = BMPFont(self.path('tiles/font.png'), 16, 16, 1)
+        self.font3 = BMPFont(self.path('tiles/font.png'), 16, 16, 6)
 
         self.fade = 0
 
@@ -52,7 +56,13 @@ class SlidesScene(Scene):
     def render(self):
         self.screen.fill((25, 25, 25))
 
-        t = self.font.render(self.message)
+        if isinstance(self.message, str):
+            t = self.font.render(self.message)
+        else:
+            if len(self.message) == 1:
+                t = self.font2.render(self.message[0])
+            else:
+                t = self.font3.render(self.message[0])
         t.set_alpha(self.fade)
         self.screen.blit(t,
                          ((self.screen.get_width() - t.get_width()) / 2,
@@ -63,7 +73,10 @@ class SplashScene(SlidesScene):
     SLIDES = [
         'A Game by Bottersnike',
         'With art by 8th Kingdom',
-        'Hold H for help.',
+        ('BRINK', 2),
+        ('Be careful. You bleed out from walking too much and crafting.',),
+        ('Stand on top of items when combing them into new things.',),
+        ('Hold H to list the full controls.',),
     ]
 
     def next(self):

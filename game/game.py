@@ -1,3 +1,4 @@
+import random
 import time
 import os
 
@@ -48,20 +49,32 @@ class Game:
         self.game_scene.difficulty = diff
         self.game_over = GameOver(self)
         self.scenes = [
-            SplashScene(self, True),
+            SplashScene(self),
             self.game_over,
             self.game_scene,
             LoadingScene(self),
         ]
 
         if self.DEVEL:
-            self.scenes[0].active = False
             self.game_scene.start()
+        else:
+            self.scenes[0].active = True
 
         for i in dir(self.game_scene):
             if i[0] != '_':
                 self.console.expose(**{i: getattr(self.game_scene, i)})
         self.console.expose(game=self, scenes=self.scenes, gs=self.game_scene, help=self.con_help, give=self.con_give)
+
+        self.music = [
+            os.path.join(base, '../assets/audio/', i)
+            for i in os.listdir(os.path.join(base, '../assets/audio/'))
+        ]
+
+        if not self.DEVEL:
+            pygame.mixer.music.load(self.music[2])
+            pygame.mixer.music.play()
+
+            pygame.mixer.music.set_endevent(pygame.USEREVENT + 3)
 
     def con_give(self, item, amount):
         for i in dir(self.game_scene):
@@ -114,6 +127,13 @@ class Game:
 
             if event.type == pygame.QUIT:
                 self.running = False
+            elif event.type == pygame.USEREVENT + 3:
+                pygame.mixer.music.load(random.choice(self.music))
+                pygame.mixer.music.set_volume(0.3)
+                pygame.time.set_timer(pygame.USEREVENT + 4, random.randint(1000, 2500))
+            elif event.type == pygame.USEREVENT + 4:
+                pygame.mixer.music.play()
+                pygame.time.set_timer(pygame.USEREVENT + 4, 0)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKQUOTE:
                     self.console.toggle()

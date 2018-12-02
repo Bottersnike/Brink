@@ -55,7 +55,7 @@ def auto_crop(surface):
 
 class GameScene(Scene):
     SHOW_CHAT = 5
-    STACK_DIST = 0.25
+    STACK_DIST = 0.125
 
     CONTROLS = 'WASD to move\n' \
                'C to craft\n' \
@@ -922,8 +922,9 @@ class GameScene(Scene):
 
     def drop_item(self, x, y, item):
         for ix, iy, ii in self.entities:
-            if math.sqrt((ix - x) ** 2 + (iy - y) ** 2) < self.STACK_DIST:
-                return self.drop_item(x + self.STACK_DIST, y, item)
+            if ii not in self.NO_PICKUP:
+                if math.sqrt((ix - x) ** 2 + (iy - y) ** 2) < self.STACK_DIST:
+                    return self.drop_item(x + self.STACK_DIST, y, item)
         self.entities.append([x, y, item])
 
     def do_wave(self):
