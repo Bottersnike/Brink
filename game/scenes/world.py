@@ -69,14 +69,14 @@ class GameScene(Scene):
     # World gen
     OCTAVES = 2
 
-    DUNGEON = -0.4
+    DUNGEON = -0.3
     DEEP = -0.1
     MEDIUM = 0.1
     SEA = 0.2
     BEACH = 0.25
     TREE_H = 0.3
-    STONE_H = 0.8
-    TOP_H = 0.85
+    STONE_H = 0.65
+    TOP_H = 0.7
 
     MAX_HUNGER = 10
     MAX_HEALTH = 10
@@ -327,9 +327,9 @@ class GameScene(Scene):
 
     V_RANGE = {
         EYE: 75,
-        ANGEL: 50,
+        ANGEL: 30,
         SLIME: 25,
-        VAMPIRE: 25,
+        VAMPIRE: 50,
     }
     RANGE = {
         EYE: 2,
@@ -341,7 +341,7 @@ class GameScene(Scene):
         EYE: 3,
         ANGEL: 3,
         SLIME: 1,
-        VAMPIRE: 5,
+        VAMPIRE: 2,
     }
     ARMOUR_RATING = {
         ARMOUR_S: 2,
@@ -475,7 +475,7 @@ class GameScene(Scene):
                 seed = random.random()
                 gen = OpenSimplex(seed=round(seed * 100000))
 
-                if self.TREE_H > gen.noise2d(px / self.WIDTH, py / self.HEIGHT) > self.SEA:
+                if self.TOP_H > gen.noise2d(px / self.WIDTH, py / self.HEIGHT) > self.STONE_H:
                     # Spawn near a beach
                     break
         else:
@@ -878,7 +878,7 @@ class GameScene(Scene):
         base = 1
         for i in self.hotbar:
             if i is not None:
-                base += self.ARMOUR_RATING.get(i[0], 0)
+                base += self.ARMOUR_RATING.get(i[0], 0) * i[1]
         return base
 
     @staticmethod
