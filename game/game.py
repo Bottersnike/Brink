@@ -58,7 +58,35 @@ class Game:
             self.scenes[0].active = False
             self.game_scene.start()
 
-        self.console.expose(game=self, scenes=self.scenes, gs=self.game_scene)
+        for i in dir(self.game_scene):
+            if i[0] != '_':
+                self.console.expose(**{i: getattr(self.game_scene, i)})
+        self.console.expose(game=self, scenes=self.scenes, gs=self.game_scene, help=self.con_help, give=self.con_give)
+
+    def con_give(self, item, amount):
+        for i in dir(self.game_scene):
+            if getattr(self.game_scene, i) == item and i.isupper():
+                name = i
+                break
+        else:
+            return print('Unknown item')
+
+        for n, i in enumerate(self.game_scene.hotbar):
+            if i is None:
+                self.game_scene.hotbar[n] = [item, amount]
+                break
+            elif i[0] == item:
+                i[1] += amount
+                break
+        else:
+            for _ in range(amount):
+                self.game_scene.drop_item(self.game_scene.pos[0], self.game_scene.pos[1], item)
+
+        print('Gave player {} {}s'.format(amount, name))
+
+    @staticmethod
+    def con_help():
+        print(' > give(ITEM, AMOUNT)')
 
     def tick(self, dt):
         for i in self.scenes:

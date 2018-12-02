@@ -30,6 +30,8 @@ class Console:
     PS1 = '>>> '
     PS2 = '... '
 
+    LINE_WIDTH = 100
+
     def __init__(self, screen=None, height=400):
         self._stdout = sys.stdout
         sys.stdout = self
@@ -41,7 +43,7 @@ class Console:
 
         self.log('Debug console started')
 
-        self.background = (0, 0, 0, 200)
+        self.background = (0, 0, 0, 230)
 
         pygame.font.init()
         self.font = pygame.font.Font("assets/Monospace.ttf", 14)
@@ -63,6 +65,12 @@ class Console:
     # Make file-like
     def write(self, text):
         self._stdout.write(text)
+
+        for line in text.split('\n'):
+            for i in [line[i:i+self.LINE_WIDTH] for i in range(0, len(line), self.LINE_WIDTH)]:
+                self._write(i + '\n')
+
+    def _write(self, text):
         for char in text:
             if char == '\n':
                 self._lines.append((

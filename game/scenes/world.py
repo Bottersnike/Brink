@@ -150,6 +150,8 @@ class GameScene(Scene):
     ARMOUR_I = 7, 1
     VAMPIRE = 7, 2
 
+    GEM_WALL = 7, 3
+
     # Assets
     HEART = 0, 0
     ARMOUR = 1, 0
@@ -200,7 +202,6 @@ class GameScene(Scene):
     )
     FLOATING = (
         EYE,
-        ANGEL,
     )
     HOSTILE = (
         EYE,
@@ -220,11 +221,15 @@ class GameScene(Scene):
         (PIG_HEART, PIG_HEART, PIG_HEART, CANDLE_G, CANDLE_G): ALTAR,
         (STICK, STICK, STICK, STICK): PLANK_F_DROP,
         (PLANK_F_DROP, PLANK_F_DROP): PLANK_W_DROP,
-        (LOG_DROP,): STICK,
         (GEM_S, GEM_S, STICK): SWORD_S,
         (INGOT, INGOT, SWORD_S): SWORD_I,
         (GEM_L, PIG_HEART, PIG_MEAT): ARMOUR_S,
         (ARMOUR_S, INGOT, INGOT): ARMOUR_I,
+
+        (GEM_S, GEM_S, GEM_S, GEM_S, GEM_S): GEM_M,
+        (GEM_M, GEM_M, GEM_M, GEM_M, GEM_M): GEM_L,
+        (GEM_S, GEM_M, GEM_L): GEM_WALL,
+        (LOG_DROP,): STICK,
     }
     SACRIFICES = {
         STICK: 0.05,
@@ -236,6 +241,9 @@ class GameScene(Scene):
         CANDLE: 0.5,
         CANDLE_G: 1,
         ALTAR: 4,
+        GEM_M: 0.5,
+        GEM_L: 1,
+        GEM_WALL: 1,
     }
 
     # Digging stuff
@@ -270,6 +278,7 @@ class GameScene(Scene):
         CANDLE_L: 1,
         ALTAR: 25,
         ROCK_WALL: 15,
+        GEM_WALL: 50,
     }
     DIG_T = {
         GRASS: 0.3,
@@ -291,6 +300,7 @@ class GameScene(Scene):
         CANDLE_L: 0.3,
         CANDLE_G: 0.9,
         ALTAR: 4,
+        GEM_WALL: 2,
     }
     E_DROPS = {
         TREE: LOG_DROP,
@@ -300,6 +310,7 @@ class GameScene(Scene):
         PLANK_W: LOG_DROP,
         ROCK_WALL: RUBBLE,
         CANDLE_G: CANDLE_G,
+        GEM_WALL: GEM_L,
     }
     A_HEALTH = {
         PIG: 10,
@@ -322,9 +333,13 @@ class GameScene(Scene):
 
     # Waves 'n stuff
     WAVE_TIMERS = (
-        1, 2, 3, 3, 3, 3, 3, 2, 1, 0.5, 0.25, 0.1
+        1, 2, 3, 3, 3, 3, 3, 2
     )  # Minutes
 
+    BREAKERS = (
+        VAMPIRE,
+        ANGEL,
+    )
     V_RANGE = {
         EYE: 75,
         ANGEL: 30,
@@ -650,7 +665,7 @@ class GameScene(Scene):
                 self.set_g(tx, ty, self.PLANK_W)
                 used = 1
         # Standard placeable items
-        elif item[0] in (self.CANDLE, self.CANDLE_G, self.ALTAR):
+        elif item[0] in (self.CANDLE, self.CANDLE_G, self.ALTAR, self.GEM_WALL):
             if self.world[tx][ty] in self.PLACEABLE:
                 for i in self.g_entities:
                     if tuple(i[0:2]) == (tx, ty):
@@ -740,7 +755,7 @@ class GameScene(Scene):
             time.sleep(0.1)
 
         while self.active:
-            ge = [(int(x), int(y)) for x, y, _, __ in self.g_entities]
+            ge = {(int(i[0]), int(i[1])): i for i in self.g_entities}
 
             # Move animals
             for i in self.animals:
@@ -776,6 +791,13 @@ class GameScene(Scene):
                     for dxi in range(0, 2 if (i[0] + dx) % self.ground.tw != 0 else 1):
                         for dyi in range(0, 2 if (i[1] + dy) % self.ground.th != 0 else 1):
                             if (ntx + dxi, nty + dyi) in ge:
+                                if i[2] in self.BREAKERS:
+                                    j = ge[(ntx + dxi, nty + dyi)]
+                                    j[3] -= random.random() / 3
+                                    if j[3] <= 0:
+                                        self.set_g(j[0], j[1], None)
+                                        if j[2] == self.ALTAR:
+                                            self.altars -= 1
                                 break
                         else:
                             continue
@@ -866,11 +888,15 @@ class GameScene(Scene):
         for i in self.RECIPIES:
             crafted = self.can_craft(i, usable)
             if crafted:
-                for j in crafted:
-                    self.entities.remove(j)
-                self.drop_item(self.pos[0] / self.ground.tw, self.pos[1] / self.ground.th, self.RECIPIES[i])
+                cost = self.SACRIFICES.get(self.RECIPIES[i], 0)
+                if cost > self.health:
+                    self.do_chat('You need {} hp to form this'.format(cost))
+                else:
+                    for j in crafted:
+                        self.entities.remove(j)
+                    self.drop_item(self.pos[0] / self.ground.tw, self.pos[1] / self.ground.th, self.RECIPIES[i])
 
-                self.health -= self.SACRIFICES.get(self.RECIPIES[i], 0)
+                    self.health -= cost
                 break
 
     @property
@@ -1221,5 +1247,4 @@ class GameScene(Scene):
                 y += self.assets.th * 2 + 8
                 if y + self.assets.th * 2 > self.screen.get_height():
                     y = 16
-                    sx += 512
-            pass
+                    sx += 456
