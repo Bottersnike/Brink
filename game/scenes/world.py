@@ -219,8 +219,6 @@ class GameScene(Scene):
         (STICK, STICK, PIG_MEAT): CANDLE,
         (CANDLE, CANDLE, CANDLE): CANDLE_G,
         (PIG_HEART, PIG_HEART, PIG_HEART, CANDLE_G, CANDLE_G): ALTAR,
-        (STICK, STICK, STICK, STICK): PLANK_F_DROP,
-        (PLANK_F_DROP, PLANK_F_DROP): PLANK_W_DROP,
         (GEM_S, GEM_S, STICK): SWORD_S,
         (INGOT, INGOT, SWORD_S): SWORD_I,
         (GEM_L, PIG_HEART, PIG_MEAT): ARMOUR_S,
@@ -230,6 +228,8 @@ class GameScene(Scene):
         (GEM_M, GEM_M, GEM_M, GEM_M, GEM_M): GEM_L,
         (GEM_S, GEM_M, GEM_L): GEM_WALL,
         (LOG_DROP,): STICK,
+        (STICK, STICK): PLANK_F_DROP,
+        (PLANK_F_DROP, PLANK_F_DROP): PLANK_W_DROP,
     }
     SACRIFICES = {
         STICK: 0.05,
@@ -380,7 +380,9 @@ class GameScene(Scene):
         self.ground = TileSheet(self.path('tiles/ground.png'), 32, 32, scale)
         self.player = auto_crop(TileSheet(self.path('tiles/player.png'), 32, 32, scale).get_at(0, 0))
         self.assets = TileSheet(self.path('tiles/ui.png'), 8, 8, ui_scale)
-        self.font = BMPFont(self.path('tiles/FONT.png'), 16, 16)
+        self.assets_s = TileSheet(self.path('tiles/ui.png'), 8, 8, scale)
+        self.font = BMPFont(self.path('tiles/font.png'), 16, 16, 1)
+        self.font2 = BMPFont(self.path('tiles/font.png'), 16, 16, 2)
 
         self.world: List[List[Tuple]] = [
             [self.GRASS for _ in range(self.HEIGHT)]
@@ -420,9 +422,6 @@ class GameScene(Scene):
         self.hb_p = 0
 
         self.p_rot = 0
-
-        self.font = BMPFont(self.path('tiles/FONT.png'), 16, 16, 1)
-        self.font2 = BMPFont(self.path('tiles/FONT.png'), 16, 16, 2)
 
         self.wave_timer = 0
         self.wave = 0
@@ -937,7 +936,7 @@ class GameScene(Scene):
             self.wave += 1
 
         for _ in range(self.wave * (self.altars + 1)):
-            for j in (self.EYE, self.ANGEL, self.SLIME, self.SLIME, self.Z_PIG, self.Z_PIG, self.VAMPIRE):
+            for j in (self.EYE, self.ANGEL, self.SLIME, self.SLIME, self.Z_PIG, self.VAMPIRE):
                 if j == self.ANGEL and self.wave <= 4:
                     continue
                 if j == self.VAMPIRE and self.wave <= 7:
@@ -1243,6 +1242,11 @@ class GameScene(Scene):
                 x += 16
                 self.screen.blit(self.assets.get_at(*self.HOTBAR_S), (x, y))
                 self.screen.blit(self.ground.get_at(*result), (x, y))
+
+                if result in self.SACRIFICES:
+                    t = self.font.render(str(self.SACRIFICES[result]))
+                    self.screen.blit(t, (sx + 4, y + self.assets.th * 2 - 20))
+                    self.screen.blit(self.assets_s.get_at(*self.HEART), (sx + 12 + t.get_width(), y + self.assets.th * 2 - 18))
 
                 y += self.assets.th * 2 + 8
                 if y + self.assets.th * 2 > self.screen.get_height():

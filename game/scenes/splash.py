@@ -11,7 +11,7 @@ class SlidesScene(Scene):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.font = BMPFont(self.path('tiles/FONT.png'), 16, 16, 3)
+        self.font = BMPFont(self.path('tiles/font.png'), 16, 16, 3)
 
         self.fade = 0
 
