@@ -428,6 +428,7 @@ class GameScene(Scene):
         self.wave_timer = 0
         self.wave = 0
 
+        # noinspection PyArgumentList
         self.col_surf = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA).convert_alpha()
         self.text_ol = []
 
@@ -608,6 +609,7 @@ class GameScene(Scene):
 
         if display:
             t = self.font.render(str(round(amount, 3)), True)
+            # noinspection PyArgumentList
             tex = pygame.Surface((t.get_width() + self.assets_s.tw, t.get_height()), pygame.SRCALPHA).convert_alpha()
             tex.blit(self.assets_s.get_at(*self.BROKEN_HEART), (0, (t.get_height() - self.assets_s.tw) / 2))
             tex.blit(t, (self.assets_s.tw, 0))
@@ -1214,14 +1216,20 @@ class GameScene(Scene):
                 self.text_ol.remove(i)
 
         # HUD
-        health = math.ceil(self.health) if self.flash else math.floor(self.health)
+        health = math.ceil(self.health)
         armour = math.ceil(self.armour) if self.flash else math.floor(self.armour)
         hunger = math.ceil(self.hunger) if self.flash else math.floor(self.hunger)
 
         for n in range(health):
             x = (self.assets.tw + 8) * n + 32
             y = 32
-            self.screen.blit(self.assets.get_at(*self.HEART), (x, y))
+
+            heart = self.HEART if n != math.ceil(self.health) - 1 or self.health % 1 == 0 else \
+                (self.BROKEN_HEART if self.flash else self.HEART) if self.health % 1 > 0.5 else \
+                (self.BROKEN_HEART if self.flash else None)
+
+            if heart is not None:
+                self.screen.blit(self.assets.get_at(*heart), (x, y))
 
         for n in range(armour):
             x = (self.assets.tw + 8) * n + 32
