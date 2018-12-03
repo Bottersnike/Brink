@@ -76,8 +76,8 @@ class GameScene(Scene):
     SEA = 0.2
     BEACH = 0.25
     TREE_H = 0.3
-    STONE_H = 0.65
-    TOP_H = 0.7
+    STONE_H = 0.675
+    TOP_H = 0.725
 
     MAX_HUNGER = 10
     MAX_HEALTH = 10
@@ -403,7 +403,7 @@ class GameScene(Scene):
         self.o_chunks = []
         random.seed()
         self.scroll = [0, 0]
-        self.pos = [self.WIDTH // 2 * self.ground.tw, self.HEIGHT // 2 * self.ground.th]
+        self.pos = [0, 0]
         self.last_tile = None
 
         self.health = self.MAX_HEALTH
@@ -440,7 +440,8 @@ class GameScene(Scene):
         self.health = self.MAX_HEALTH
         self.hunger = self.MAX_HUNGER
         self.last_tile = None
-        self.pos = [self.WIDTH // 2 * self.ground.tw, self.HEIGHT // 2 * self.ground.th]
+        self.pos = [random.randint(10, self.WIDTH - 20) * self.ground.tw,
+                    random.randint(10, self.HEIGHT - 20) * self.ground.th]
         self.scroll = [0, 0]
         self.wave = self.wave_timer = 0
         self.text_ol = []
