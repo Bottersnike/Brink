@@ -65,6 +65,7 @@ class GameScene(Scene):
                '  view attack ranges\n' \
                'LEFT CLICK to break\n' \
                'RIGHT CLICK to place\n' \
+               'X to toggle hotbars\n' \
                'Hold H for help'
 
     # World gen
@@ -419,6 +420,7 @@ class GameScene(Scene):
 
         self.animal_thread = None
 
+        self.hotbar_2: List[Optional[List[Union[List[int, int], int]]]] = [None] * 10
         self.hotbar: List[Optional[List[Union[List[int, int], int]]]] = [None] * 10
         self.altars = 0
         self.hb_p = 0
@@ -434,6 +436,7 @@ class GameScene(Scene):
 
     def reset(self):
         self.hotbar = [None] * 10
+        self.hotbar_2 = [None] * 10
         self.altars = 0
         self.hb_p = 0
         self.m_lock = False
@@ -586,6 +589,9 @@ class GameScene(Scene):
                         self.hotbar[self.hb_p] = None
             elif event.key == pygame.K_c:
                 self.do_craft()
+            elif event.key == pygame.K_x:
+                if self.dual_hb:
+                    self.hotbar, self.hotbar_2 = self.hotbar_2, self.hotbar
         elif event.type == pygame.USEREVENT:
             self.slow_tick()
         elif event.type == pygame.USEREVENT + 1:
@@ -603,6 +609,12 @@ class GameScene(Scene):
             if event.button == 1:
                 self.digging = None
                 self.m_lock = False
+
+    @property
+    def dual_hb(self):
+        if self.hotbar_2.count(None) < len(self.hotbar_2):
+            return True
+        return self.hotbar.count(None) == 0
 
     def damage_player(self, amount, display=True):
         self.health -= amount
@@ -1271,6 +1283,18 @@ class GameScene(Scene):
             else:
                 self.screen.blit(self.assets.get_at(*self.HOTBAR), (x, y))
             x += hbw
+
+        if self.dual_hb:
+            x = (self.screen.get_width() - hbw * len(self.hotbar)) / 2
+            y = self.screen.get_height() - hbw * 2 - 36
+            for n, i in enumerate(self.hotbar_2):
+                if i is not None:
+                    nn = self.font.render(str(i[1]), True)
+                    self.screen.blit(self.ground.get_at(*i[0]), (x, y))
+                    self.screen.blit(nn, (x + 8, y + self.assets.tw * 2 - nn.get_height() - 8))
+
+                self.screen.blit(self.assets.get_at(*self.HOTBAR), (x, y))
+                x += hbw
 
         # Console
         y = self.screen.get_height() - 156

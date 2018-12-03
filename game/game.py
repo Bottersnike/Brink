@@ -71,7 +71,7 @@ class Game:
         ]
 
         if not self.DEVEL:
-            pygame.mixer.music.load(self.music[2])
+            pygame.mixer.music.load(self.music[0])
             pygame.mixer.music.play()
 
             pygame.mixer.music.set_endevent(pygame.USEREVENT + 3)
