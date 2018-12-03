@@ -1,7 +1,7 @@
-<p style="align:center;"><img
+<p align="center"><img
+    width="320"
     src="https://static.jam.vg/content/1ad/e1/z/1bada.png.320x256.fit.jpg"
-    width="320">
-</p>
+></p>
 
 > **How long can you survive at the brink of death?**
 
