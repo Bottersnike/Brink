@@ -114,7 +114,10 @@ def get_res():
 
 # noinspection PyBroadException
 def main():
-    w, h, f, d = get_res()
+    try:
+        w, h, f, d = get_res()
+    except Exception:
+        w, h, f, d = 0, 0, 1, 0
 
     if w is None or h is None:
         return

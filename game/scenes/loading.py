@@ -13,7 +13,7 @@ class LoadingScene(Scene):
 
         self.message = ''
         self.progress = 0
-        
+
         # Loading screen should always be a fallback active scene
         self.active = True
 
@@ -29,8 +29,9 @@ class LoadingScene(Scene):
         self.screen.blit(t2,
                          ((self.screen.get_width() - t2.get_width()) / 2,
                           (self.screen.get_height() + t.get_height()) / 2))
-          
-        bar = pygame.Rect((self.screen.get_width() / 5 * 2, (self.screen.get_height() + t.get_height()) / 2 + 32, self.screen.get_width() / 5, 10))
+
+        bar = pygame.Rect((self.screen.get_width() / 5 * 2, (self.screen.get_height() + t.get_height()) / 2 + 32,
+                           self.screen.get_width() / 5, 10))
         pygame.draw.rect(self.screen, (70, 70, 70), bar)
         if self.progress:
             bar.width = bar.width / 100 * self.progress

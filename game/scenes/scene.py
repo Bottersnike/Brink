@@ -5,9 +5,8 @@ class Scene:
     ASSETS = '../../assets'
 
     def __init__(self, game, start_active=False):
-        self._active = start_active
-        if start_active:
-            self._scene_went_active()
+        self._active = False
+        self.active = start_active
 
         self.screen = game.screen
         self._game = game

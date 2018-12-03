@@ -572,7 +572,8 @@ class GameScene(Scene):
                 # Drop item
                 if self.hotbar[self.hb_p] is not None:
                     self.hotbar[self.hb_p][1] -= 1
-                    self.drop_item(self.pos[0] / self.ground.tw, self.pos[1] / self.ground.th, self.hotbar[self.hb_p][0])
+                    self.drop_item(self.pos[0] / self.ground.tw, self.pos[1] / self.ground.th,
+                                   self.hotbar[self.hb_p][0])
                     if self.hotbar[self.hb_p][1] <= 0:
                         self.hotbar[self.hb_p] = None
             elif event.key == pygame.K_c:
@@ -586,6 +587,10 @@ class GameScene(Scene):
                 self.click(event.pos)
             elif event.button == 3:
                 self.use(event.pos, self.hotbar[self.hb_p], self.hb_p)
+            elif event.button == 4:
+                self.hb_p = (self.hb_p + 1) % 10
+            elif event.button == 5:
+                self.hb_p = (self.hb_p - 1) % 10
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 self.digging = None
@@ -1247,7 +1252,8 @@ class GameScene(Scene):
                 if result in self.SACRIFICES:
                     t = self.font.render(str(self.SACRIFICES[result]))
                     self.screen.blit(t, (sx + 4, y + self.assets.th * 2 - 20))
-                    self.screen.blit(self.assets_s.get_at(*self.HEART), (sx + 12 + t.get_width(), y + self.assets.th * 2 - 18))
+                    self.screen.blit(self.assets_s.get_at(*self.HEART),
+                                     (sx + 12 + t.get_width(), y + self.assets.th * 2 - 18))
 
                 y += self.assets.th * 2 + 8
                 if y + self.assets.th * 2 > self.screen.get_height():

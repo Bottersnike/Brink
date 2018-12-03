@@ -1,5 +1,3 @@
-import pygame
-
 from game.pyg import BMPFont
 from .scene import Scene
 
