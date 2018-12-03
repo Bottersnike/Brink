@@ -607,7 +607,7 @@ class GameScene(Scene):
         self.health -= amount
 
         if display:
-            t = self.font.render(str(amount), True)
+            t = self.font.render(str(round(amount, 3)), True)
             tex = pygame.Surface((t.get_width() + self.assets_s.tw, t.get_height()), pygame.SRCALPHA).convert_alpha()
             tex.blit(self.assets_s.get_at(*self.BROKEN_HEART), (0, (t.get_height() - self.assets_s.tw) / 2))
             tex.blit(t, (self.assets_s.tw, 0))
@@ -981,6 +981,8 @@ class GameScene(Scene):
 
                 while True:
                     x, y = random.randint(0, self.WIDTH - 1), random.randint(0, self.HEIGHT - 1)
+                    if (x * self.ground.tw - self.pos[0]) ** 2 + (y * self.ground.th - self.pos[1]) ** 2 < 10 ** 2:
+                        continue
                     if self.world[x][y] in self.PLACEABLE:
                         for i in self.g_entities:
                             if i[0] == x and i[1] == y:
@@ -1250,14 +1252,15 @@ class GameScene(Scene):
         x = (self.screen.get_width() - hbw * len(self.hotbar)) / 2
         y = self.screen.get_height() - hbw - 32
         for n, i in enumerate(self.hotbar):
+            if i is not None:
+                nn = self.font.render(str(i[1]), True)
+                self.screen.blit(self.ground.get_at(*i[0]), (x, y))
+                self.screen.blit(nn, (x + 8, y + self.assets.tw * 2 - nn.get_height() - 8))
+
             if n == self.hb_p:
                 self.screen.blit(self.assets.get_at(*self.HOTBAR_S), (x, y))
             else:
                 self.screen.blit(self.assets.get_at(*self.HOTBAR), (x, y))
-            if i is not None:
-                n = self.font.render(str(i[1]), True)
-                self.screen.blit(self.ground.get_at(*i[0]), (x, y))
-                self.screen.blit(n, (x + 8, y + self.assets.tw * 2 - n.get_height() - 8))
             x += hbw
 
         # Console
@@ -1292,13 +1295,13 @@ class GameScene(Scene):
             for ingredients, result in self.RECIPIES.items():
                 x = sx
                 for i in ingredients:
-                    self.screen.blit(self.assets.get_at(*self.HOTBAR), (x, y))
                     self.screen.blit(self.ground.get_at(*i), (x, y))
+                    self.screen.blit(self.assets.get_at(*self.HOTBAR), (x, y))
                     x += self.assets.tw * 2 + 4
 
                 x += 16
-                self.screen.blit(self.assets.get_at(*self.HOTBAR_S), (x, y))
                 self.screen.blit(self.ground.get_at(*result), (x, y))
+                self.screen.blit(self.assets.get_at(*self.HOTBAR_S), (x, y))
 
                 if result in self.SACRIFICES:
                     t = self.font.render(str(self.SACRIFICES[result]))
