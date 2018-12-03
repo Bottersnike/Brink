@@ -1,6 +1,10 @@
 # Brink
 > **How long can you survive at the brink of death?**
 
+<p style="text-align: center;">
+  ![Brink](https://static.jam.vg/content/1ad/e1/z/1bada.png.320x256.fit.jpg)
+</p>
+
 * [Ludum Dare](https://ldjam.com/events/ludum-dare/43/$126370)
 * [Itch.io](https://bottersnike.itch.io/brink)
 
