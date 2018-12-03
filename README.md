@@ -1,8 +1,4 @@
-<p align="center"><img
-    width="320"
-    src="https://static.jam.vg/content/1ad/e1/z/1bada.png.320x256.fit.jpg"
-></p>
-
+# Brink
 > **How long can you survive at the brink of death?**
 
 * [Ludum Dare](https://ldjam.com/events/ludum-dare/43/$126370)
