@@ -228,7 +228,7 @@ class GameScene(Scene):
 
         (GEM_S, GEM_S, GEM_S, GEM_S, GEM_S): GEM_M,
         (GEM_M, GEM_M, GEM_M, GEM_M, GEM_M): GEM_L,
-        (GEM_M, GEM_L, GEM_L, GEM_L): GEM_WALL,
+        (GEM_L, GEM_L, GEM_M): GEM_WALL,
         (LOG_DROP,): STICK,
         (STICK, STICK): PLANK_F_DROP,
         (PLANK_F_DROP, PLANK_F_DROP): PLANK_W_DROP,
@@ -280,7 +280,7 @@ class GameScene(Scene):
         CANDLE_L: 1,
         ALTAR: 25,
         ROCK_WALL: 15,
-        GEM_WALL: 50,
+        GEM_WALL: 35,
     }
     DIG_T = {
         GRASS: 0.3,
