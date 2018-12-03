@@ -61,7 +61,8 @@ class GameScene(Scene):
                'C to craft\n' \
                '1-0 to select hotbar\n' \
                'Q to drop, F to pickup\n' \
-               'SHIFT to crouch\n' \
+               'SHIFT to crouch and\n' \
+               '  view attack ranges\n' \
                'LEFT CLICK to break\n' \
                'RIGHT CLICK to place\n' \
                'Hold H for help'
@@ -159,6 +160,7 @@ class GameScene(Scene):
     SATANICITY = 3, 0
     HOTBAR = 0, 1, 2, 2
     HOTBAR_S = 2, 1, 2, 2
+    BROKEN_HEART = 0, 3
 
     # Movement
     SPEED = {
@@ -353,9 +355,9 @@ class GameScene(Scene):
         VAMPIRE: 5,
     }
     ATTACK = {
-        EYE: 3,
+        EYE: 1,
         ANGEL: 3,
-        SLIME: 1,
+        SLIME: 0.5,
         VAMPIRE: 2,
     }
     ARMOUR_RATING = {
@@ -426,6 +428,9 @@ class GameScene(Scene):
         self.wave_timer = 0
         self.wave = 0
 
+        self.col_surf = pygame.Surface(self.screen.get_size(), pygame.SRCALPHA).convert_alpha()
+        self.text_ol = []
+
     def reset(self):
         self.hotbar = [None] * 10
         self.altars = 0
@@ -438,6 +443,7 @@ class GameScene(Scene):
         self.pos = [self.WIDTH // 2 * self.ground.tw, self.HEIGHT // 2 * self.ground.th]
         self.scroll = [0, 0]
         self.wave = self.wave_timer = 0
+        self.text_ol = []
 
     def start(self):
         self.active = False
@@ -596,6 +602,18 @@ class GameScene(Scene):
                 self.digging = None
                 self.m_lock = False
 
+    def damage_player(self, amount, display=True):
+        self.health -= amount
+
+        if display:
+            t = self.font.render(str(amount), True)
+            tex = pygame.Surface((t.get_width() + self.assets_s.tw, t.get_height()), pygame.SRCALPHA).convert_alpha()
+            tex.blit(self.assets_s.get_at(*self.BROKEN_HEART), (0, (t.get_height() - self.assets_s.tw) / 2))
+            tex.blit(t, (self.assets_s.tw, 0))
+            self.text_ol.append([
+                tex, self.pos[0], self.pos[1] - 8, 255
+            ])
+
     def use(self, pos, item: Optional[List[Union[Tuple[int, int], int]]], index: int):
         if item is None:
             return
@@ -616,7 +634,7 @@ class GameScene(Scene):
                     if i[3] <= 0:
                         self.set_g(i[0], i[1], None)
                         self.altars -= 1
-                    self.health -= 1
+                    self.damage_player(1)
                     self.hunger = max(self.hunger, self.hunger - 3)
                     self.do_chat('A zombie pig has appeared.')
                     self.animals.append([tx * self.ground.tw, ty * self.ground.th, self.Z_PIG,
@@ -715,7 +733,7 @@ class GameScene(Scene):
         self.flash = not self.flash
 
         if self.hunger <= 0:
-            self.health -= 0.2
+            self.damage_player(0.2)
 
         world_copy = [list(i) for i in self.world]
 
@@ -743,7 +761,8 @@ class GameScene(Scene):
 
                 # noinspection PyTypeChecker
                 if dist < self.ground.tw * self.RANGE[i[2]]:
-                    self.health -= self.ATTACK[i[2]] / self.armour
+                    # noinspection PyTypeChecker
+                    self.damage_player(self.ATTACK[i[2]] / self.armour)
 
             if do_rand and random.random() > 0.8:
                 i[4] = (i[4] + random.randint(-1, 1)) % 4
@@ -829,6 +848,16 @@ class GameScene(Scene):
                         self.drop_item(animal[0] / self.ground.tw, animal[1] / self.ground.th, i)
 
     def click(self, pos):
+        hbw = self.assets.tw * 2 + 16
+        x = (self.screen.get_width() - hbw * len(self.hotbar)) / 2
+        y = self.screen.get_height() - hbw - 32
+        for n, i in enumerate(self.hotbar):
+            rect = pygame.Rect((x, y, self.assets.tw * 2, self.assets.tw * 2))
+            if rect.collidepoint(*pos):
+                self.hb_p = n
+                return
+            x += hbw
+
         if self.hunger <= 0:
             return
 
@@ -900,7 +929,7 @@ class GameScene(Scene):
                         self.entities.remove(j)
                     self.drop_item(self.pos[0] / self.ground.tw, self.pos[1] / self.ground.th, self.RECIPIES[i])
 
-                    self.health -= cost
+                    self.damage_player(cost)
                 break
 
     @property
@@ -908,6 +937,7 @@ class GameScene(Scene):
         base = 1
         for i in self.hotbar:
             if i is not None:
+                # noinspection PyTypeChecker
                 base += self.ARMOUR_RATING.get(i[0], 0) * i[1]
         return base
 
@@ -1045,7 +1075,7 @@ class GameScene(Scene):
             else:
                 if not mods & pygame.KMOD_SHIFT:
                     if random.random() > .7:
-                        self.health -= self.BLOOD_COST
+                        self.damage_player(self.BLOOD_COST, False)
                         self.entities.insert(0, [tx, ty, self.BLOOD])
 
         self.last_tile = (tx, ty)
@@ -1143,6 +1173,17 @@ class GameScene(Scene):
                     nw = ((self.ground.tw - 16) / self.HEALTH[p]) * h
                     pygame.draw.rect(self.screen, (200, 50, 50), (x + 8, y + self.ground.th - 5, nw, 4))
 
+        if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+            sw, sh = self.screen.get_size()
+            self.col_surf.fill((0, 0, 0, 0))
+            for x, y, p, _, __, ___ in self.animals:
+                if p in self.RANGE:
+                    x, y = round(x + self.ground.tw / 2 + self.scroll[0]), round(y + self.ground.th / 2 + self.scroll[1])
+                    r = round(self.RANGE[p] * self.ground.tw)
+                    if -r <= x <= sw + r and -r <= y <= sh + r:
+                        pygame.draw.circle(self.col_surf, (255, 0, 0, 50), (x, y), r)
+            self.screen.blit(self.col_surf, (0, 0))
+
         for x, y, p, h, d, _ in self.animals:
             x += self.scroll[0]
             y += self.scroll[1]
@@ -1158,6 +1199,15 @@ class GameScene(Scene):
 
         player = pygame.transform.rotate(self.player, 360 - self.p_rot)
         self.screen.blit(player, (self.pos[0] + self.scroll[0], self.pos[1] + self.scroll[1]))
+
+        for i in list(self.text_ol):
+            t, x, y, a = i
+            t.set_alpha(a)
+            self.screen.blit(t, (x + self.scroll[0], y + self.scroll[1]))
+            i[3] -= 5
+            i[2] -= 0.1
+            if i[3] <= 0:
+                self.text_ol.remove(i)
 
         # HUD
         health = math.ceil(self.health) if self.flash else math.floor(self.health)
@@ -1253,7 +1303,7 @@ class GameScene(Scene):
                     t = self.font.render(str(self.SACRIFICES[result]))
                     self.screen.blit(t, (sx + 4, y + self.assets.th * 2 - 20))
                     self.screen.blit(self.assets_s.get_at(*self.HEART),
-                                     (sx + 12 + t.get_width(), y + self.assets.th * 2 - 18))
+                                     (sx + 8 + t.get_width(), y + self.assets.th * 2 - 20))
 
                 y += self.assets.th * 2 + 8
                 if y + self.assets.th * 2 > self.screen.get_height():
