@@ -22,6 +22,12 @@ class SlidesScene(Scene):
         self.state = self.SHOW
         self.slide = 0
 
+    def _scene_went_active(self):
+        self.slide = 0
+        self.state = 0
+        self.state = self.SHOW
+        self.message = ''
+
     def next(self):
         pass
 
