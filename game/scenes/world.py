@@ -228,7 +228,7 @@ class GameScene(Scene):
 
         (GEM_S, GEM_S, GEM_S, GEM_S, GEM_S): GEM_M,
         (GEM_M, GEM_M, GEM_M, GEM_M, GEM_M): GEM_L,
-        (GEM_S, GEM_M, GEM_L): GEM_WALL,
+        (GEM_M, GEM_L, GEM_L, GEM_L): GEM_WALL,
         (LOG_DROP,): STICK,
         (STICK, STICK): PLANK_F_DROP,
         (PLANK_F_DROP, PLANK_F_DROP): PLANK_W_DROP,
@@ -1181,7 +1181,8 @@ class GameScene(Scene):
             self.col_surf.fill((0, 0, 0, 0))
             for x, y, p, _, __, ___ in self.animals:
                 if p in self.RANGE:
-                    x, y = round(x + self.ground.tw / 2 + self.scroll[0]), round(y + self.ground.th / 2 + self.scroll[1])
+                    x = round(x + self.ground.tw / 2 + self.scroll[0])
+                    y = round(y + self.ground.th / 2 + self.scroll[1])
                     r = round(self.RANGE[p] * self.ground.tw)
                     if -r <= x <= sw + r and -r <= y <= sh + r:
                         pygame.draw.circle(self.col_surf, (255, 0, 0, 50), (x, y), r)
